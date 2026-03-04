@@ -9,7 +9,7 @@ Initially providing
 The proposed CRDs are as follows
 
 LocalLdapUser
--------------
+```yaml
 metadata:
   name: gwaines
   namespace: deployment
