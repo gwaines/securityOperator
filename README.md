@@ -125,9 +125,9 @@ spec:
     linuxGroups:
       - <Linux group 1>
       - <Linux group 2>
-      - …    
-```
+      - …
+
 status: 
   # None
-
+```
 
