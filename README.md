@@ -9,7 +9,7 @@ Initially providing
 The proposed CRDs are as follows
 
 LocalLdapUser
-```yaml
+```
 metadata:
   name: gwaines
   namespace: deployment
@@ -49,11 +49,11 @@ status:
   gidNumber: 100     # 'users'; as default group
 
   temporaryLockOut: false
-
+```
 
 
 LocalLdapGroup
---------------
+```
 metadata:
   name: starlingx-admins
   namespace: deployment
@@ -70,10 +70,10 @@ spec:
 
 status: 
   gidNumber: <integer>
-
+```
 
 LocalLdapPasswordPolicy
------------------------
+```
 metadata:
   name: gwaines
   namespace: deployment
@@ -100,11 +100,11 @@ spec:
 status: 
 
   # None
-
+```
 
 
 LinuxRoleBinding
-----------------
+```
 metadata:
   name (str): <arbitrary name of role binding>  
 
@@ -126,7 +126,7 @@ spec:
       - <Linux group 1>
       - <Linux group 2>
       - …    
-
+```
 status: 
   # None
 
