@@ -2,8 +2,8 @@
 StarlingX Security Operator
 
 Providing a declarative interface for configuring Users and Groups of a local openldap/slapd deployment being used for SSH authentication.
-
 The proposed CRDs are as follows:
+
 * **LocalLdapUser**
 ```
 metadata:
@@ -46,7 +46,6 @@ status:
 
   temporaryLockOut: false
 ```
-
 
 * **LocalLdapGroup**
 ```
@@ -94,15 +93,13 @@ spec:
   pwdGraceAuthnLimit: 2
 
 status: 
-
   # None
 ```
 <br>
 <br>
 <br>
-AND
+AND<br>
 providing a declarative interface for binding openldap/slapd Users and/or Groups to local Linux Groups (via /etc/security/group.conf) for the purpose of managing authorization.
-
 The proposed CRD is as follows:
 
 * **LinuxRoleBinding**
