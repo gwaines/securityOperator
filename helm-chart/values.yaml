@@ -1,7 +1,7 @@
 replicaCount: 1
 
 image:
-  repository: starlingx/security-operator
+  repository: gwaines/security-operator
   pullPolicy: IfNotPresent
   tag: "0.1.0"
 

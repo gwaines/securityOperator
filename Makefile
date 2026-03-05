@@ -33,13 +33,20 @@ build: ## Build the package
 	python -m build
 
 docker-build: ## Build Docker image
-	docker build -t starlingx/security-operator:latest .
+	docker build -t gwaines/security-operator:latest .
+
+docker-push: ## Push Docker image
+	docker push gwaines/security-operator:latest
 
 helm-install: ## Install Helm chart
 	helm install security-operator helm-chart/
 
 helm-upgrade: ## Upgrade Helm chart
 	helm upgrade security-operator helm-chart/
+
+helm-package: ## Package Helm chart
+	mkdir -p dist
+	helm package helm-chart/ -d dist/
 
 apply-crds: ## Apply CRDs to Kubernetes
 	kubectl apply -f crds/
