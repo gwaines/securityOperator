@@ -1,0 +1,54 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: localldapgroups.starlingx.io
+spec:
+  group: starlingx.io
+  versions:
+  - name: v1
+    served: true
+    storage: true
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            required:
+            - cn
+            properties:
+              cn:
+                type: string
+                description: "Common name of the group"
+              description:
+                type: string
+                description: "Group description"
+              members:
+                type: array
+                items:
+                  type: object
+                  required:
+                  - kind
+                  - name
+                  properties:
+                    kind:
+                      type: string
+                      enum:
+                      - LocalLdapUser
+                      - LocalLdapGroup
+                      description: "Type of member"
+                    name:
+                      type: string
+                      description: "Name of the member"
+                description: "Group members"
+          status:
+            type: object
+            properties:
+              gidNumber:
+                type: integer
+                description: "Assigned GID number"
+  scope: Namespaced
+  names:
+    plural: localldapgroups
+    singular: localldapgroup
+    kind: LocalLdapGroup

@@ -1,0 +1,33 @@
+{{- if .Values.rbac.create -}}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "security-operator.fullname" . }}
+  labels:
+    {{- include "security-operator.labels" . | nindent 4 }}
+rules:
+- apiGroups: [""]
+  resources: ["events"]
+  verbs: ["create"]
+- apiGroups: ["starlingx.io"]
+  resources: ["localldapusers", "localldapgroups", "localldappasswordpolicies", "linuxrolebindings"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+- apiGroups: ["starlingx.io"]
+  resources: ["localldapusers/status", "localldapgroups/status", "localldappasswordpolicies/status", "linuxrolebindings/status"]
+  verbs: ["get", "update", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ include "security-operator.fullname" . }}
+  labels:
+    {{- include "security-operator.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ include "security-operator.fullname" . }}
+subjects:
+- kind: ServiceAccount
+  name: {{ include "security-operator.serviceAccountName" . }}
+  namespace: {{ .Release.Namespace }}
+{{- end }}

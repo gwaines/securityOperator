@@ -1,0 +1,17 @@
+apiVersion: v2
+name: security-operator
+description: StarlingX Security Operator for LDAP and Linux role management
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+keywords:
+  - starlingx
+  - ldap
+  - security
+  - operator
+home: https://github.com/starlingx/security-operator
+sources:
+  - https://github.com/starlingx/security-operator
+maintainers:
+  - name: StarlingX
+    email: starlingx-discuss@lists.starlingx.io

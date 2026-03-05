@@ -1,0 +1,51 @@
+replicaCount: 1
+
+image:
+  repository: starlingx/security-operator
+  pullPolicy: IfNotPresent
+  tag: "0.1.0"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext:
+  fsGroup: 2000
+
+securityContext:
+  capabilities:
+    drop:
+    - ALL
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsUser: 1000
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+ldap:
+  uri: "ldap://openldap:389"
+  bindDN: "cn=admin,dc=example,dc=com"
+  bindPassword: "admin"
+  baseDN: "dc=example,dc=com"
+
+rbac:
+  create: true
