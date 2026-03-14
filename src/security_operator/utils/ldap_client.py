@@ -22,8 +22,8 @@ class LdapClient:
         self.bind_dn = bind_dn or os.getenv('LDAP_BIND_DN', 'cn=admin,dc=example,dc=com')
         self.bind_password = bind_password or os.getenv('LDAP_BIND_PASSWORD', 'admin')
         self.base_dn = os.getenv('LDAP_BASE_DN', 'dc=example,dc=com')
-        self.users_ou = f"ou=users,{self.base_dn}"
-        self.groups_ou = f"ou=groups,{self.base_dn}"
+        self.users_ou = os.getenv('LDAP_USERS_OU', f"ou=People,{self.base_dn}")
+        self.groups_ou = os.getenv('LDAP_GROUPS_OU', f"ou=Groups,{self.base_dn}")
         
     def _get_connection(self):
         """Get LDAP connection."""
@@ -177,14 +177,31 @@ class LdapClient:
                 self.groups_ou,
                 ldap.SCOPE_ONELEVEL,
                 '(objectClass=posixGroup)',
-                ['cn', 'description']
+                ['cn', 'gidNumber', 'memberUid', 'description']
             )
             
             groups = []
             for dn, attrs in results:
+                gid = attrs.get('gidNumber', [b''])[0].decode()
+                # Explicit memberUid attributes
+                members = [m.decode() for m in attrs.get('memberUid', [])]
+                # Find users whose primary gidNumber matches this group
+                if gid:
+                    primary_members = conn.search_s(
+                        self.users_ou,
+                        ldap.SCOPE_ONELEVEL,
+                        f'(&(objectClass=posixAccount)(gidNumber={gid}))',
+                        ['uid']
+                    )
+                    for _, user_attrs in primary_members:
+                        uid = user_attrs.get('uid', [b''])[0].decode()
+                        if uid and uid not in members:
+                            members.append(uid)
+                
                 group_data = {
                     'cn': attrs.get('cn', [b''])[0].decode(),
                     'description': attrs.get('description', [b''])[0].decode() or None,
+                    'members': members,
                 }
                 groups.append(group_data)
             

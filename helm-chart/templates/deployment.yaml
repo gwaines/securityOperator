@@ -33,13 +33,17 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
             - name: LDAP_URI
-              value: {{ .Values.ldap.uri }}
+              value: {{ .Values.ldap.uri | quote }}
             - name: LDAP_BIND_DN
-              value: {{ .Values.ldap.bindDN }}
+              value: {{ .Values.ldap.bindDN | quote }}
             - name: LDAP_BIND_PASSWORD
-              value: {{ .Values.ldap.bindPassword }}
+              value: {{ .Values.ldap.bindPassword | quote }}
             - name: LDAP_BASE_DN
-              value: {{ .Values.ldap.baseDN }}
+              value: {{ .Values.ldap.baseDN | quote }}
+            - name: LDAP_USERS_OU
+              value: {{ printf "%s,%s" .Values.ldap.usersOU .Values.ldap.baseDN | quote }}
+            - name: LDAP_GROUPS_OU
+              value: {{ printf "%s,%s" .Values.ldap.groupsOU .Values.ldap.baseDN | quote }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}

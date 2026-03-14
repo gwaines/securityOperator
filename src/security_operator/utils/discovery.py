@@ -2,7 +2,7 @@
 
 import logging
 import asyncio
-from kubernetes import client
+from kubernetes import client, config
 from security_operator.utils.ldap_client import LdapClient
 
 logger = logging.getLogger(__name__)
@@ -14,6 +14,10 @@ class LdapDiscoveryService:
     def __init__(self, namespace: str = "default"):
         self.namespace = namespace
         self.ldap_client = LdapClient()
+        try:
+            config.load_incluster_config()
+        except config.ConfigException:
+            config.load_kube_config()
         self.k8s_client = client.CustomObjectsApi()
     
     async def discover_and_import(self):
@@ -85,7 +89,10 @@ class LdapDiscoveryService:
                 'spec': {
                     'cn': group_data['cn'],
                     'description': group_data.get('description'),
-                    'members': []  # Would need member resolution
+                    'members': [
+                        {'kind': 'LocalLdapUser', 'name': m}
+                        for m in group_data.get('members', [])
+                    ]
                 }
             }
             

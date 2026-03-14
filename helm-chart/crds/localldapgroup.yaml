@@ -8,6 +8,16 @@ spec:
   - name: v1
     served: true
     storage: true
+    additionalPrinterColumns:
+    - name: Description
+      type: string
+      jsonPath: .spec.description
+    - name: Members
+      type: integer
+      jsonPath: .status.memberCount
+    - name: Age
+      type: date
+      jsonPath: .metadata.creationTimestamp
     schema:
       openAPIV3Schema:
         type: object
@@ -47,6 +57,11 @@ spec:
               gidNumber:
                 type: integer
                 description: "Assigned GID number"
+              memberCount:
+                type: integer
+                description: "Number of group members"
+    subresources:
+      status: {}
   scope: Namespaced
   names:
     plural: localldapgroups

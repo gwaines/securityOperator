@@ -46,6 +46,8 @@ ldap:
   bindDN: "cn=admin,dc=example,dc=com"
   bindPassword: "admin"
   baseDN: "dc=example,dc=com"
+  usersOU: "ou=People"
+  groupsOU: "ou=Groups"
 
 rbac:
   create: true
