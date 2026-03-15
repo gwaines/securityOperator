@@ -138,6 +138,16 @@ class LdapClient:
         if group.description:
             attrs['description'] = [group.description.encode()]
         
+        # Add initial members if specified
+        if group.members:
+            member_uids = [
+                member.name for member in group.members 
+                if member.kind == 'LocalLdapUser'
+            ]
+            if member_uids:
+                attrs['memberUid'] = [uid.encode() for uid in member_uids]
+                logger.info(f"Creating group {group.cn} with initial members: {member_uids}")
+        
         conn = self._get_connection()
         try:
             conn.add_s(group_dn, list(attrs.items()))
@@ -149,8 +159,66 @@ class LdapClient:
     async def update_group(self, group: LocalLdapGroup):
         """Update LDAP group."""
         logger.info(f"Updating LDAP group: {group.cn}")
-        # Implementation for group updates
-        pass
+        
+        group_dn = f"cn={group.cn},{self.groups_ou}"
+        
+        # Get current group attributes
+        conn = self._get_connection()
+        try:
+            # First get the current group entry
+            current = conn.search_s(
+                group_dn,
+                ldap.SCOPE_BASE,
+                '(objectClass=posixGroup)',
+                ['memberUid', 'description']
+            )
+            
+            if not current:
+                logger.warning(f"Group {group.cn} not found in LDAP")
+                return
+            
+            current_attrs = current[0][1]
+            current_members = [m.decode() for m in current_attrs.get('memberUid', [])]
+            
+            # Extract member UIDs from the group spec
+            new_members = []
+            if group.members:
+                new_members = [
+                    member.name for member in group.members 
+                    if member.kind == 'LocalLdapUser'
+                ]
+            
+            # Calculate changes
+            members_to_add = set(new_members) - set(current_members)
+            members_to_remove = set(current_members) - set(new_members)
+            
+            modifications = []
+            
+            # Add new members
+            if members_to_add:
+                modifications.append((ldap.MOD_ADD, 'memberUid', [m.encode() for m in members_to_add]))
+                logger.info(f"Adding members to {group.cn}: {list(members_to_add)}")
+            
+            # Remove old members
+            if members_to_remove:
+                modifications.append((ldap.MOD_DELETE, 'memberUid', [m.encode() for m in members_to_remove]))
+                logger.info(f"Removing members from {group.cn}: {list(members_to_remove)}")
+            
+            # Update description if changed
+            current_desc = current_attrs.get('description', [b''])[0].decode() if current_attrs.get('description') else ''
+            if group.description and group.description != current_desc:
+                modifications.append((ldap.MOD_REPLACE, 'description', [group.description.encode()]))
+                logger.info(f"Updating description for {group.cn}: {group.description}")
+            
+            # Apply modifications
+            if modifications:
+                conn.modify_s(group_dn, modifications)
+                logger.info(f"Successfully updated LDAP group: {group.cn}")
+            else:
+                logger.info(f"No changes needed for LDAP group: {group.cn}")
+                
+        finally:
+            conn.unbind_s()
     
     async def delete_group(self, cn: str):
         """Delete LDAP group."""
