@@ -12,6 +12,9 @@ spec:
     - name: Mail
       type: string
       jsonPath: .spec.mail[0]
+    - name: UID
+      type: integer
+      jsonPath: .status.uidNumber
     - name: Home
       type: string
       jsonPath: .spec.homeDirectory
@@ -87,6 +90,8 @@ spec:
               temporaryLockOut:
                 type: boolean
                 description: "Temporary lockout status"
+    subresources:
+      status: {}
   scope: Namespaced
   names:
     plural: localldapusers

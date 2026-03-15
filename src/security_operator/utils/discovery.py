@@ -58,11 +58,19 @@ class LdapDiscoveryService:
                     'sn': user_data.get('sn'),
                     'mail': user_data.get('mail', []),
                     'homeDirectory': user_data.get('homeDirectory'),
-                    'loginShell': user_data.get('loginShell', '/bin/bash')
+                    'loginShell': user_data.get('loginShell', '/bin/bash'),
+                    'pwdReset': user_data.get('pwdReset', False)
                 }
             }
             
             await self._create_cr('localldapusers', user_cr)
+            
+            # Set status after creation if uidNumber exists
+            if user_data.get('uidNumber'):
+                await self._patch_status('localldapusers', cr_name, {
+                    'uidNumber': user_data['uidNumber']
+                })
+            
             logger.info(f"Imported LDAP user as CR: {cr_name}")
     
     async def _import_groups(self):
@@ -97,6 +105,13 @@ class LdapDiscoveryService:
             }
             
             await self._create_cr('localldapgroups', group_cr)
+            
+            # Set status after creation if gidNumber exists
+            if group_data.get('gidNumber'):
+                await self._patch_status('localldapgroups', cr_name, {
+                    'gidNumber': group_data['gidNumber']
+                })
+            
             logger.info(f"Imported LDAP group as CR: {cr_name}")
     
     async def _cr_exists(self, plural: str, name: str) -> bool:
@@ -123,4 +138,15 @@ class LdapDiscoveryService:
             namespace=self.namespace,
             plural=plural,
             body=body
+        )
+
+    async def _patch_status(self, plural: str, name: str, status: dict):
+        """Patch the status of a custom resource."""
+        self.k8s_client.patch_namespaced_custom_object_status(
+            group='starlingx.io',
+            version='v1',
+            namespace=self.namespace,
+            plural=plural,
+            name=name,
+            body={'status': status}
         )

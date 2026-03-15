@@ -10,16 +10,23 @@ logger = logging.getLogger(__name__)
 
 
 @kopf.on.create('starlingx.io', 'v1', 'localldapusers')
-async def create_ldap_user(spec: Dict[str, Any], name: str, namespace: str, **kwargs):
+async def create_ldap_user(spec: Dict[str, Any], name: str, namespace: str, labels: Dict[str, str], patch: kopf.Patch, **kwargs):
     """Handle creation of LocalLdapUser."""
     logger.info(f"Creating LDAP user: {name} in namespace: {namespace}")
     
+    patch.status['gidNumber'] = 100
+    patch.status['temporaryLockOut'] = False
+
+    if labels.get('imported') == 'true':
+        logger.info(f"Skipping LDAP creation for imported user: {name}")
+        return
+
     user = LocalLdapUser.from_spec(spec, name, namespace)
     ldap_client = LdapClient()
     
     try:
         uid_number = await ldap_client.create_user(user)
-        return {'uidNumber': uid_number, 'gidNumber': 100, 'temporaryLockOut': False}
+        patch.status['uidNumber'] = uid_number
     except Exception as e:
         logger.error(f"Failed to create LDAP user {name}: {e}")
         raise kopf.PermanentError(f"Failed to create LDAP user: {e}")

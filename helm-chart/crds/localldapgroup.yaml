@@ -12,6 +12,9 @@ spec:
     - name: Description
       type: string
       jsonPath: .spec.description
+    - name: GID
+      type: integer
+      jsonPath: .status.gidNumber
     - name: Members
       type: integer
       jsonPath: .status.memberCount
